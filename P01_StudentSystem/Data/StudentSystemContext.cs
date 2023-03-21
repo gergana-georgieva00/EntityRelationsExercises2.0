@@ -8,57 +8,58 @@ namespace P01_StudentSystem.Data
     public class StudentSystemContext : DbContext
     {
         public StudentSystemContext(DbContextOptions options)
-           : base(options)
+            : base(options)
         {
         }
 
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<Homework> Homeworks { get; set; }
-        public DbSet<Resource> Resources { get; set; }
         public DbSet<Student> Students { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Resource> Resources { get; set; }
+        public DbSet<Homework> Homeworks { get; set; }
         public DbSet<StudentCourse> StudentsCourses { get; set; }
 
+        // Validation
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Student>(entity =>
+            modelBuilder.Entity<Student>(e =>
             {
-                entity.HasKey(s => s.StudentId);
-                entity.Property(s => s.Name).HasMaxLength(100);
-                entity.Property(s => s.PhoneNumber).IsRequired(false).HasMaxLength(10).IsUnicode(false);
-                entity.Property(s => s.Birthday).IsRequired(false);
+                e.HasKey(s => s.StudentId);
+                e.Property(s => s.Name).HasMaxLength(100).IsUnicode();
+                e.Property(s => s.PhoneNumber).HasMaxLength(10).IsUnicode(false).IsRequired(false);
+                e.Property(s => s.Birthday).IsRequired(false);
             });
 
-            modelBuilder.Entity<Course>(entity =>
+            modelBuilder.Entity<Course>(e =>
             {
-                entity.HasKey(c => c.CourseId);
-                entity.Property(c => c.Name).HasMaxLength(80).IsUnicode();
-                entity.Property(c => c.Description).IsRequired(false);
+                e.HasKey(c => c.CourseId);
+                e.Property(c => c.Name).HasMaxLength(80).IsUnicode();
+                e.Property(c => c.Description).IsUnicode().IsRequired(false);
             });
 
-            modelBuilder.Entity<Resource>(entity =>
+            modelBuilder.Entity<Resource>(e =>
             {
-                entity.HasKey(r => r.ResourceId);
-                entity.Property(r => r.Name).HasMaxLength(50).IsUnicode();
-                entity.Property(r => r.Url).IsUnicode(false);
+                e.HasKey(r => r.ResourceId);
+                e.Property(r => r.Name).HasMaxLength(50).IsUnicode();
+                e.Property(r => r.Url).IsUnicode(false);
 
-                entity.HasOne(r => r.Course).WithMany(c => c.Resources).HasForeignKey(r => r.CourseId);
+                e.HasOne(r => r.Course).WithMany(c => c.Resources).HasForeignKey(r => r.CourseId);
             });
 
-            modelBuilder.Entity<Homework>(entity =>
+            modelBuilder.Entity<Homework>(e =>
             {
-                entity.HasKey(h => h.HomeworkId);
-                entity.Property(h => h.Content).IsUnicode(false);
+                e.HasKey(h => h.HomeworkId);
+                e.Property(h => h.Content).IsUnicode(false);
 
-                entity.HasOne(h => h.Course).WithMany(c => c.Homeworks).HasForeignKey(h => h.CourseId);
-                entity.HasOne(h => h.Student).WithMany(s => s.Homeworks).HasForeignKey(h => h.StudentId);
+                e.HasOne(h => h.Course).WithMany(c => c.Homeworks).HasForeignKey(h => h.CourseId);
+                e.HasOne(h => h.Student).WithMany(s => s.Homeworks).HasForeignKey(h => h.StudentId);
             });
 
-            modelBuilder.Entity<StudentCourse>(entity =>
+            modelBuilder.Entity<StudentCourse>(e =>
             {
-                entity.HasKey(sc => new { sc.StudentId, sc.CourseId });
+                e.HasKey(sc => new { sc.StudentId, sc.CourseId });
 
-                entity.HasOne(sc => sc.Student).WithMany(s => s.StudentsCourses).HasForeignKey(sc => sc.StudentId);
-                entity.HasOne(sc => sc.Course).WithMany(c => c.StudentsCourses).HasForeignKey(sc => sc.CourseId);
+                e.HasOne(sc => sc.Student).WithMany(s => s.StudentsCourses).HasForeignKey(sc => sc.StudentId);
+                e.HasOne(sc => sc.Course).WithMany(c => c.StudentsCourses).HasForeignKey(sc => sc.CourseId);
             });
         }
     }
